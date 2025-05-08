@@ -19,25 +19,32 @@ const Carousel: React.FC<CarouselProps> = ({
   infinite = false,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const maxIndex = images.length - frameSize;
 
   const handleNext = () => {
     setCurrentIndex(prev => {
+      const totalItems = images.length;
+      const nextIndex = prev + step;
+
       if (infinite) {
-        return (prev + step) % images.length;
+        // wrap corretamente considerando múltiplos itens visíveis
+        return ((nextIndex % totalItems) + totalItems) % totalItems;
       }
 
-      return Math.min(prev + step, maxIndex);
+      return Math.min(nextIndex, totalItems - frameSize);
     });
   };
 
   const handlePrev = () => {
     setCurrentIndex(prev => {
+      const totalItems = images.length;
+      const nextIndex = prev - step;
+
       if (infinite) {
-        return (prev - step + images.length) % images.length;
+        // wrap corretamente para trás
+        return ((nextIndex % totalItems) + totalItems) % totalItems;
       }
 
-      return Math.max(prev - step, 0);
+      return Math.max(nextIndex, 0);
     });
   };
 
