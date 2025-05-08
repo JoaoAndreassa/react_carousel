@@ -19,36 +19,47 @@ const Carousel: React.FC<CarouselProps> = ({
   infinite = false,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const maxIndex = images.length - frameSize;
 
   const handleNext = () => {
     setCurrentIndex(prev => {
-      const totalItems = images.length;
       const nextIndex = prev + step;
 
       if (infinite) {
-        // wrap corretamente considerando múltiplos itens visíveis
-        return ((nextIndex % totalItems) + totalItems) % totalItems;
+        return nextIndex % images.length;
       }
 
-      return Math.min(nextIndex, totalItems - frameSize);
+      return Math.min(nextIndex, maxIndex);
     });
   };
 
   const handlePrev = () => {
     setCurrentIndex(prev => {
-      const totalItems = images.length;
       const nextIndex = prev - step;
 
       if (infinite) {
-        // wrap corretamente para trás
-        return ((nextIndex % totalItems) + totalItems) % totalItems;
+        return (nextIndex + images.length) % images.length;
       }
 
       return Math.max(nextIndex, 0);
     });
   };
 
-  const transformValue = `translateX(-${currentIndex * itemWidth}px)`;
+  // Calcular deslocamento de forma circular
+  const getOffset = () => {
+    if (!infinite) {
+      return currentIndex * itemWidth;
+    }
+
+    // Evita salto quando currentIndex + frameSize ultrapassa o limite
+    const endIndex = currentIndex + frameSize;
+
+    if (endIndex > images.length) {
+      return 0; // reinício visual
+    }
+
+    return currentIndex * itemWidth;
+  };
 
   return (
     <div className="carousel">
@@ -63,7 +74,7 @@ const Carousel: React.FC<CarouselProps> = ({
         <ul
           className="carousel__track"
           style={{
-            transform: transformValue,
+            transform: `translateX(-${getOffset()}px)`,
             transition: `transform ${animationDuration}ms ease-in-out`,
           }}
         >
